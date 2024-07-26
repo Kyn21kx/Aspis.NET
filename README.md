@@ -22,6 +22,44 @@ public async Task<IActionResult> CreateUser([FromBody] UserDto userDto)
 }
 ```
 
+### Auto map results for Unit testing with Http responses
+
+The definition of an Aspis `ApiOperationResult` contains a `Status` and an optional `ErrorMessage`, the `Status` gracefully maps to Http status codes, whilst still letting you know exactly what happened inside your functions when developing / testing.
+
+The status type is an enum defined as:
+
+```csharp
+	[Flags]
+	public enum ApiOperationStatus : uint {
+		None = 0u,
+		Success = 1u,
+		Created = 2u,
+		Updated = 3u,
+		/// <summary>
+		/// The input of a process was not in the correct format
+		/// </summary>
+		ValidationError = 4u << 0,
+		/// <summary>
+		/// Tried to fetch data that does not exist in the Database
+		/// </summary>
+		EntityNotFoundError = 4u << 1,
+		/// <summary>
+		/// Tried to post data, but it currently exists in the Database
+		/// </summary>
+		DataConflictError = 4u << 2,
+		/// <summary>
+		/// A user tried to access a resource that they're not allowed to / they have incorrect credentials
+		/// </summary>
+		AuthorizationError = 4u << 3,
+		/// <summary>
+		/// Some behaviour internally in the program did not go as expected
+		/// </summary>
+		InternalError = 4u << 4,
+		UnkownError = 4u << 5,
+		IsErrorStatus = ValidationError | EntityNotFoundError | DataConflictError | AuthorizationError | InternalError | UnkownError
+	}
+```
+
 ### ORM and Repository implementation
 
 Aspis comes with a built-in repository pattern implementation based off of EF Core, making it compatible with any database provider.
